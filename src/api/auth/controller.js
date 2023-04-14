@@ -1,6 +1,7 @@
 import JWT from "jsonwebtoken";
-
 import db from "../../models/index";
+import bcrypt from "bcrypt";
+
 import { createToken } from "./createToken";
 
 const register = async (req, res) => {
@@ -13,7 +14,7 @@ const register = async (req, res) => {
     return res.status(403).json({ success: false, msg: "Email already exist" });
   }
 
-  const passwordHash = bcrypt.hashSync(password);
+  const passwordHash = bcrypt.hashSync(password, 10);
 
   const newUser = await db.User.create({
     firstName: firstName,

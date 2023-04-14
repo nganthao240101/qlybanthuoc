@@ -1,9 +1,8 @@
 import express from "express";
-import authController from "./controllers/auth/authController";
-import { authRouter } from "./controllers/auth/authRouter";
-import { categoryRouter } from "./controllers/category/categoryRouter";
-import { productRouter } from "./controllers/product/productRouter";
-import { fileRouter } from "./controllers/file/fileRouter";
+import { authRouter } from "./auth/router";
+import { categoryRouter } from "./category/router";
+import { productRouter } from "./product/router";
+import { fileRouter } from "./file/router";
 
 export const restRouter = express.Router();
 restRouter.use("/user", authRouter);

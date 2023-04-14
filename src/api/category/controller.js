@@ -1,5 +1,4 @@
-import { body } from "express-validator";
-import db from "../../../models/index";
+import db from "../../models";
 
 let getCategoryList = (req, res, next) => {
   try {

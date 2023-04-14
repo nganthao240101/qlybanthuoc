@@ -1,5 +1,5 @@
-import productServices from "../../../services/productServices";
-import db from "../../../models/index";
+import productServices from "../../services/productServices";
+import db from "../../models";
 
 const handleGetAllProducts = async (req, res) => {
   const products = await productServices.getAllItems();
