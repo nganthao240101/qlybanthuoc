@@ -1,12 +1,25 @@
 import express from "express";
-import productController from "../product/productController";
+import productController from "./controller";
 import uploadFile from "../../../middleware/upload";
+import { allowRolesMiddleware } from "../../middleware/allowRoles";
+import { ROLES } from "../../constants";
 
 export const productRouter = express.Router();
 
-productRouter.get("/all-product", productController.handleGetAllProducts);
+// chỉ gửi guest khi không ai login.
+productRouter.get(
+  "/all-product",
+  allowRolesMiddleware([
+    ROLES.ADMIN,
+    ROLES.EMPLOYEE,
+    ROLES.CUSTOMER,
+    ROLES.GUEST,
+  ]),
+  productController.handleGetAllProducts
+);
 productRouter.post(
   "/add-product",
+  allowRolesMiddleware([ROLES.ADMIN, ROLES.EMPLOYEE]),
   uploadFile.single("photo"),
   productController.handleAddProduct
 );

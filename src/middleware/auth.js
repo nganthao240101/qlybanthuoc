@@ -2,7 +2,7 @@ import passport from "passport";
 import JWT from "jsonwebtoken";
 import config from "../config";
 
-let JWTSign = function (user, date) {
+const JWTSign = function (user, date) {
   return JWT.sign(
     {
       iss: config.app.name,
@@ -13,7 +13,8 @@ let JWTSign = function (user, date) {
     config.app.secret
   );
 };
-let loginCheck = () => {
+
+const loginCheck = () => {
   return (req, res, next) => {
     var token = null;
     if (req && req.cookies) {
@@ -25,9 +26,10 @@ let loginCheck = () => {
     next();
   };
 };
-let validatelogin = (req, res, next) => {
+
+const validatelogin = (req, res, next) => {
   passport.authenticate("jwt", { session: false }, (err, user, info) => {
-    let contype = req.headers["content-type"];
+    const contype = req.headers["content-type"];
     var json = !(!contype || contype.indexOf("application/json") !== 0);
     if (err && err == "expired") {
       next();
@@ -68,10 +70,11 @@ let validatelogin = (req, res, next) => {
   })(req, res, next);
 };
 
-let userImplant = (req, res, next) => {
+const userImplant = (req, res, next) => {
   res.locals.user = req.user;
   next();
 };
+
 module.exports.user = {
   loginCheck: loginCheck,
   validatelogin: validatelogin,

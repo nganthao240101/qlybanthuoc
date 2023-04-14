@@ -1,14 +1,15 @@
 import productServices from "../../../services/productServices";
 import db from "../../../models/index";
 
-let handleGetAllProducts = async (req, res) => {
-  let products = await productServices.getAllItems();
+const handleGetAllProducts = async (req, res) => {
+  const products = await productServices.getAllItems();
   return res.status(200).json({
     errMessage: `Ok`,
     products,
   });
 };
-let handleAddProduct = async (req, res, next) => {
+
+const handleAddProduct = async (req, res, next) => {
   const {
     categoryId,
     subCategoryId,
@@ -27,7 +28,7 @@ let handleAddProduct = async (req, res, next) => {
   } = req.body;
   console.log(req.body);
 
-  // let product = await productServices.addProduct(req.body);
+  // const product = await productServices.addProduct(req.body);
   db.Product.findOne({
     where: { name: name },
   })
@@ -62,26 +63,26 @@ let handleAddProduct = async (req, res, next) => {
     });
 };
 
-let handleDeleteProduct = async (req, res) => {
+const handleDeconsteProduct = async (req, res) => {
   console.log(req.query.id);
-  let data = await productServices.deleteProduct(req.query.id);
+  const data = await productServices.deconsteProduct(req.query.id);
   return res.status(200).json({
     errMessage: `Ok`,
     data,
   });
 };
 
-let handleUpdateProduct = async (req, res) => {
+const handleUpdateProduct = async (req, res) => {
   console.log(req.query.id);
   console.log(req.body);
-  let data = await productServices.updateProduct(req.query.id, req.body);
+  const data = await productServices.updateProduct(req.query.id, req.body);
   return res.status(200).json({
     errMessage: `Ok`,
     data,
   });
 };
 
-let handleGetProductListByCategory = async (req, res, next) => {
+const handleGetProductListByCategory = async (req, res, next) => {
   console.log(req.query);
   db.Product.findAll({
     order: [["createdAt", "DESC"]],
@@ -102,8 +103,8 @@ let handleGetProductListByCategory = async (req, res, next) => {
     });
 };
 
-let handleDetailProduct = async (req, res) => {
-  let data = await productServices.detailProduct(req.query.id);
+const handleDetailProduct = async (req, res) => {
+  const data = await productServices.detailProduct(req.query.id);
 
   return res.status(200).json({
     errMessage: `Detail product`,
@@ -111,12 +112,12 @@ let handleDetailProduct = async (req, res) => {
   });
 };
 
-let handleGetProductByCategoryById = async (req, res, next) => {
-  let data = await productServices.getProductByCategoryById(req.query);
+const handleGetProductByCategoryById = async (req, res, next) => {
+  const data = await productServices.getProductByCategoryById(req.query);
 };
 
-let multiplePhotoUpload = async (req, res, next) => {
-  let attachmentEntries = [];
+const multiplePhotoUpload = async (req, res, next) => {
+  const attachmentEntries = [];
   console.log(req.files);
   var productId = req.body.productId;
   for (var i = 0; i < req.files.length; i++) {
@@ -150,7 +151,7 @@ let multiplePhotoUpload = async (req, res, next) => {
       next(err);
     });
 };
-let handleGetAllPhotos = (req, res, next) => {
+const handleGetAllPhotos = (req, res, next) => {
   db.Product.findAll({
     attributes: ["id", "name", "brand"],
     include: {
@@ -168,7 +169,7 @@ let handleGetAllPhotos = (req, res, next) => {
     });
 };
 
-let addProductOffer = async (req, res, next) => {
+const addProductOffer = async (req, res, next) => {
   const { productId, qty, discount_per, discount_price, total, net_price } =
     req.body;
   console.log(req.body);
@@ -209,7 +210,7 @@ let addProductOffer = async (req, res, next) => {
 module.exports = {
   handleGetAllProducts: handleGetAllProducts,
   handleAddProduct: handleAddProduct,
-  handleDeleteProduct: handleDeleteProduct,
+  handleDeconsteProduct: handleDeconsteProduct,
   handleUpdateProduct: handleUpdateProduct,
   handleDetailProduct: handleDetailProduct,
   handleGetProductListByCategory: handleGetProductListByCategory,

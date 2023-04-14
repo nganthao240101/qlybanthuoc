@@ -1,11 +1,9 @@
 import express from "express";
-import authController from "./authController";
-import { localStrategy, jwtStrategy } from "../../../middleware/stratery";
-import { sanitize } from "../../../middleware/sanitizer";
-import { validateBody, schemas } from "../../../middleware/validator";
-const passport = require("passport");
-const passportConfig = require("../../../passport");
-import path from "path";
+import passport from "passport";
+
+import authController from "./controller";
+
+import { sanitize } from "../../middleware/sanitizer";
 
 export const authRouter = express.Router();
 authRouter.post("/register", authController.register);
