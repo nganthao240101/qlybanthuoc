@@ -1,75 +1,68 @@
-import db from "../../../models/index";
 import JWT from "jsonwebtoken";
-import config from "../../../config";
 
-var JWTSign = function (user, date) {
-  return JWT.sign(
-    {
-      sub: user.id,
-      iam: user.type,
-      iat: date.getTime(),
-      exp: new Date().setMinutes(date.getMinutes() + 30),
-    },
-    process.env.ACCESS_TOKEN_SECRET
-  );
-};
-const register = (req, res, next) => {
-  console.log(req.body);
-  const { firstName, lastName, address, email, phone, verify, password } =
+import db from "../../models/index";
+import { createToken } from "./createToken";
+
+const register = async (req, res) => {
+  const { firstName, lastName, address, email, phone, verify, password, role } =
     req.body;
 
-  // //var passwordHash = bcrypt.hashSync(password);
-  db.User.findOne({ where: { email: email } })
-    .then((find) => {
-      if (find) {
-        return res
-          .status(200)
-          .json({ success: false, msg: "Email already exist" });
-      }
-      return db.User.create({
-        firstName: firstName,
-        lastName: lastName,
-        address: address,
-        email: email,
-        phone: phone,
-        verify: verify,
-        password: password,
-      });
-    })
-    .then((user) => {
-      if (user) {
-        return res.status(200).json({ success: true, msg: "New registration" });
-      } else {
-        res.status(500).json({ success: false });
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      next(err);
-    });
-};
+  const userFound = await db.User.findOne({ where: { email: email } });
 
-let login = async (req, res, next) => {
-  var date = new Date();
-  console.log(date);
-  console.log(req.body);
-  const username = req.body.email;
-  let user = await db.User.findOne({ where: { email: username } });
-  console.log(user);
-  if (!user) return res.send("Hello");
-  // console.log(date);
-  const token = JWTSign(user, date);
-  res.cookie("XSRF-token", token, {
-    expire: new Date().setMinutes(date.getMinutes() + 30),
-    httpOnly: true,
+  if (userFound) {
+    return res.status(403).json({ success: false, msg: "Email already exist" });
+  }
+
+  const passwordHash = bcrypt.hashSync(password);
+
+  const newUser = await db.User.create({
+    firstName: firstName,
+    lastName: lastName,
+    address: address,
+    email: email,
+    phone: phone,
+    verify: verify,
+    password: passwordHash,
+    role,
   });
-  console.log(token);
-  return res.json({ token });
 
-  // return res.status(200).json({ success: true, token, role: req.user.role });
+  const token = createToken({
+    firstName,
+    lastName,
+    address,
+    email,
+    phone,
+    role,
+  });
+
+  if (newUser) {
+    return res.json({ success: true, msg: "New registration", token });
+  }
+
+  return res.status(403).json({ success: false });
 };
 
-let getAllUsers = async (req, res, next) => {
+const login = async (req, res) => {
+  const { email: reqEmail } = req.body;
+
+  const user = await db.User.findOne({ where: { email: reqEmail } });
+  if (!user) return res.json({ message: "User not found" });
+
+  const { firstName, lastName, address, email, phone, role } = user;
+
+  const token = createToken({
+    firstName,
+    lastName,
+    address,
+    email,
+    phone,
+    role,
+  });
+
+  return res.json({ success: true, token });
+};
+
+const getAllUsers = async (req, res, next) => {
   db.User.findAll()
     .then((user) => {
       if (user) {
@@ -89,7 +82,7 @@ let getAllUsers = async (req, res, next) => {
     });
 };
 
-let addUser = async (req, res, next) => {
+const addUser = async (req, res, next) => {
   console.log(req.body);
   const { firstName, lastName, address, email, phone, verify, password } =
     req.body;
@@ -121,7 +114,8 @@ let addUser = async (req, res, next) => {
       next(err);
     });
 };
-let findUser = (req, res, next) => {
+
+const findUser = (req, res, next) => {
   db.User.findOne({
     attributes: ["firstName", "lastName"],
     where: {
@@ -138,7 +132,8 @@ let findUser = (req, res, next) => {
       next(err);
     });
 };
-let updateUser = (req, res, next) => {
+
+const updateUser = (req, res, next) => {
   const { firstName, lastName, address, email, phone, verify, password } =
     req.body;
   db.User.findOne({
@@ -174,7 +169,8 @@ let updateUser = (req, res, next) => {
       next(err);
     });
 };
-let deleteUser = (req, res, next) => {
+
+const deconsteUser = (req, res, next) => {
   db.User.findOne({
     where: { id: req.query.id },
   })
@@ -189,7 +185,7 @@ let deleteUser = (req, res, next) => {
       return res.status(409).json("user not found");
     })
     .then((re) => {
-      return res.status(200).json("delete successfully");
+      return res.status(200).json("deconste successfully");
     })
     .catch((err) => {
       console.log(err);
@@ -204,5 +200,5 @@ module.exports = {
   addUser: addUser,
   findUser: findUser,
   updateUser: updateUser,
-  deleteUser: deleteUser,
+  deconsteUser: deconsteUser,
 };
