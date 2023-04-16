@@ -1,6 +1,33 @@
 import productServices from "../../services/productServices";
 import db from "../../models";
+import { BASE_URL } from "../../constants";
+const { fn, col } = db.Product.sequelize;
 
+const getStamples = async (req, res, next) => {
+  try {
+    const products = await db.Product.findAll({
+      attributes: [
+        "discount",
+        "status",
+        "name",
+        "price",
+        "total",
+        "id",
+        "unit",
+        [fn("concat", BASE_URL, col("photo")), "photo"],
+      ],
+      limit: 20,
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (products) return res.json({ success: true, data: products });
+
+    return res.json({ success: true, data: [] });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
 const handleGetAllProducts = async (req, res) => {
   const products = await productServices.getAllItems();
   return res.status(200).json({
@@ -10,57 +37,56 @@ const handleGetAllProducts = async (req, res) => {
 };
 
 const handleAddProduct = async (req, res, next) => {
-  const {
-    categoryId,
-    subCategoryId,
-    childCategoryId,
-    name,
-    brand,
-    batch,
-    status,
-    unit,
-    expiry,
-    price,
-    qty,
-    discount,
-    total,
-    description,
-  } = req.body;
-  console.log(req.body);
-
-  // const product = await productServices.addProduct(req.body);
-  db.Product.findOne({
-    where: { name: name },
-  })
-    .then((product) => {
-      if (!product) {
-        return db.Product.create({
-          categoryId: categoryId,
-          subCategoryId: subCategoryId,
-          childCategoryId: childCategoryId,
-          status: parseInt(status) ? "active" : "inactive",
-          name: name,
-          batch: batch,
-          brand: brand,
-          unit: unit,
-          expiry: expiry,
-          price: price,
-          qty: qty,
-          discount: discount,
-          total: total,
-          photo: req.file ? req.file.path : "",
-          description: description,
-        });
-      }
-    })
-    .then((product) => {
-      res
-        .status(200)
-        .json({ success: true, msg: "Successfully inserted product" });
-    })
-    .catch(function (err) {
-      next(err);
+  try {
+    const {
+      categoryId,
+      subCategoryId,
+      childCategoryId,
+      name,
+      brand,
+      batch,
+      status,
+      unit,
+      expiry,
+      price,
+      qty,
+      discount,
+      total,
+      description,
+    } = req.body;
+    const productFound = await db.Product.findOne({
+      where: { name: name },
     });
+
+    if (productFound) return res.json({ message: "Product exited" });
+
+    const productCreated = await db.Product.create({
+      categoryId: categoryId,
+      subCategoryId: subCategoryId,
+      childCategoryId: childCategoryId,
+      status: parseInt(status) ? "active" : "inactive",
+      name: name,
+      batch: batch,
+      brand: brand,
+      unit: unit,
+      expiry: expiry,
+      price: price,
+      qty: qty,
+      discount: discount,
+      total: total,
+      photo: req.file ? req.file.filename : "",
+      description: description,
+    });
+
+    if (productCreated)
+      return res.json({
+        success: true,
+        msg: "Successfully inserted product",
+        data: productCreated,
+      });
+  } catch (error) {
+    next(error);
+  }
 };
 
 const handleDeconsteProduct = async (req, res) => {
@@ -118,8 +144,9 @@ const handleGetProductByCategoryById = async (req, res, next) => {
 
 const multiplePhotoUpload = async (req, res, next) => {
   const attachmentEntries = [];
-  console.log(req.files);
+
   var productId = req.body.productId;
+
   for (var i = 0; i < req.files.length; i++) {
     attachmentEntries.push({
       productId: productId,
@@ -128,8 +155,6 @@ const multiplePhotoUpload = async (req, res, next) => {
       imgUrl: req.files[i].destination,
     });
   }
-  console.log(attachmentEntries);
-
   db.ProductPhoto.findOne({
     where: { productId: productId },
   })
@@ -151,6 +176,7 @@ const multiplePhotoUpload = async (req, res, next) => {
       next(err);
     });
 };
+
 const handleGetAllPhotos = (req, res, next) => {
   db.Product.findAll({
     attributes: ["id", "name", "brand"],
@@ -218,4 +244,5 @@ module.exports = {
   multiplePhotoUpload: multiplePhotoUpload,
   handleGetAllPhotos: handleGetAllPhotos,
   addProductOffer: addProductOffer,
+  getStamples: getStamples,
 };

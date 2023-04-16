@@ -8,13 +8,18 @@ const getTokenFromRequest = (req) =>
 export const allowRolesMiddleware = (roles) => {
   return (req, res, next) => {
     const token = getTokenFromRequest(req);
-    const dataDecoded = verifyToken(token);
 
     if (!token && allowRoles(ROLES.GUEST, roles)) {
-      next();
-    } else if (allowRoles(dataDecoded.role, roles)) {
-      req.user = dataDecoded;
-      next();
+      return next();
+    } else {
+      // token encode by user.
+      // token from login and register.
+      const dataDecoded = verifyToken(token);
+
+      if (allowRoles(dataDecoded?.role, roles)) {
+        req.tokenDecoded = dataDecoded;
+        return next();
+      }
     }
 
     return res.json(403);

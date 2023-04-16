@@ -10,7 +10,10 @@ import { swaggerDoc } from "./docs/swaggerDoc.js";
 
 const app = appManager.setup();
 
-app.use(express.static(`${__dirname}/public`));
+app.use(
+  "/static/assets/uploads",
+  express.static(`${__dirname}/static/assets/uploads`)
+);
 
 swaggerDoc(app);
 
